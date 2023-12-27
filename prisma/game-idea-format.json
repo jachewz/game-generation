@@ -1,0 +1,8 @@
+{
+  "title": "Title",
+  "categories": ["Category1", "Category2.."],
+  "summary": "Brief summary",
+  "art": ["Style1", "Style2.."],
+  "mechanics": ["Mechanic1", "Mechanic2.."],
+  "features": ["Feature1", "Feature2.."]
+}

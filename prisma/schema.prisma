@@ -2,7 +2,6 @@ datasource db {
   provider   = "postgresql"
   url        = env("POSTGRES_PRISMA_URL") // uses connection pooling
   directUrl  = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
-  extensions = [vector]
 }
 
 generator client {
@@ -10,23 +9,30 @@ generator client {
   previewFeatures = ["postgresqlExtensions"]
 }
 
-model Pokemon {
-  id         String  @id @default(cuid())
-  number     Int
-  name       String
-  type1      String
-  type2      String?
-  total      Int
-  hp         Int
-  attack     Int
-  defense    Int
-  spAtk      Int
-  spDef      Int
-  speed      Int
-  generation Int
-  legendary  Boolean
+model Game {
+  id         Int  @id @default(autoincrement())
 
-  embedding Unsupported("vector(1536)")?
+  title      String @unique
+  categories String[]
+  summary    String
+  characters Character[]
+  features   String[]
+  art        String[]
+  mechanics  String[]
 
-  @@map("pokemon")
+  upvotes    Int       @default(0)
+  downvotes  Int       @default(0)
+  dateCreated DateTime @default(now())
+
+  @@map("idea")
+}
+
+model Character {
+  id        Int      @id @default(autoincrement())
+  name      String
+  role      String
+  traits    String[]
+  background String
+  gameId    Int
+  game      Game     @relation(fields: [gameId], references: [id])
 }

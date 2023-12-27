@@ -1,9 +1,8 @@
 import prisma from '../lib/prisma'
-import { type Pokemon } from '@prisma/client'
+import { type Game } from '@prisma/client'
 import fs from 'fs'
 import { openai } from '../lib/openai'
 import path from 'path'
-import pokemon from './pokemon-with-embeddings.json'
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('process.env.OPENAI_API_KEY is not defined. Please set it.')
@@ -13,50 +12,49 @@ if (!process.env.POSTGRES_URL) {
   throw new Error('process.env.POSTGRES_URL is not defined. Please set it.')
 }
 
+const numberOfIdeas = 1;
+
 async function main() {
   try {
-    const pika = await prisma.pokemon.findFirst({
+    const firstIdea = await prisma.game.findFirst({
       where: {
-        name: 'Pikachu',
+        id: numberOfIdeas,
       },
     })
-    if (pika) {
-      console.log('Pokédex already seeded!')
+    if (firstIdea) {
+      console.log('Idea database already seeded!')
       return
     }
   } catch (error) {
-    console.error('Error checking if "Pikachu" exists in the database.')
+    console.error('Error checking if enough ideas exists in the database.')
     throw error
   }
-  for (const record of (pokemon as any).data) {
-    // In order to save time, we'll just use the embeddings we've already generated
-    // for each Pokémon. If you want to generate them yourself, uncomment the
-    // following line and comment out the line after it.
-    // const embedding = await generateEmbedding(p.name);
-    // await new Promise((r) => setTimeout(r, 500)); // Wait 500ms between requests;
-    const { embedding, ...p } = record
 
-    // Create the pokemon in the database
-    const pokemon = await prisma.pokemon.create({
-      data: p,
-    })
+  const fp = path.join(__dirname, "./game-idea-format.json");
+  const gameIdeaFormat = fs.readFileSync(fp, 'utf-8');
 
-    // Add the embedding
-    await prisma.$executeRaw`
-        UPDATE pokemon
-        SET embedding = ${embedding}::vector
-        WHERE id = ${pokemon.id}
-    `
+  for (let i = 0; i < numberOfIdeas; i++) {
+    await generateIdea(gameIdeaFormat).then(async result => {
 
-    console.log(`Added ${pokemon.number} ${pokemon.name}`)
+      if (result) {
+        const idea = JSON.parse(result);
+
+        if (hasAllProperties(idea, JSON.parse(gameIdeaFormat))) {
+          console.log("Idea has all expected properties.");
+          await prisma.game.create({
+            data: idea
+          });
+        } else {
+          console.log("Idea is missing some expected properties.");
+        }
+      } else {
+        console.log('null result');
+      }
+    });
+    await new Promise((r) => setTimeout(r, 500)); // Wait 500ms between requests;
   }
 
-  // Uncomment the following lines if you want to generate the JSON file
-  // fs.writeFileSync(
-  //   path.join(__dirname, "./pokemon-with-embeddings.json"),
-  //   JSON.stringify({ data }, null, 2),
-  // );
-  console.log('Pokédex seeded successfully!')
+  console.log('Database seeded!')
 }
 main()
   .then(async () => {
@@ -68,13 +66,37 @@ main()
     process.exit(1)
   })
 
-async function generateEmbedding(_input: string) {
-  const input = _input.replace(/\n/g, ' ')
-  const embeddingData = await openai.embeddings.create({
-    model: 'text-embedding-ada-002',
-    input,
-  })
-  console.log(embeddingData)
-  const [{ embedding }] = (embeddingData as any).data
-  return embedding
+async function generateIdea(format: string) {
+  console.log(`Generate a new game idea with format: \
+  ${format}`);
+  try {
+  const response = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [
+      {
+        "role": "user",
+        "content": `Generate original new game with format: \
+                       ${format}`
+      },
+    ],
+    temperature: 0.7,
+    max_tokens: 200,
+    top_p: 1,
+  });
+  console.log(response.choices[0].message.content);
+  console.log(`prompt tokens: ${response.usage?.prompt_tokens}`);
+  console.log(`completion tokens: ${response.usage?.completion_tokens}`);
+  console.log(`total tokens: ${response.usage?.total_tokens}`);
+  return response.choices[0].message.content;
+} catch (error) {
+  console.log("error generating idea");  
+} 
+  return "An error occurred";
+}
+
+function hasAllProperties(jsonObject: Record<string, any>, expectedProperties: Record<string, any>): boolean {
+  const objectKeys = Object.keys(jsonObject);
+  const missingProperties = Object.keys(expectedProperties).filter(prop => !objectKeys.includes(prop));
+
+  return missingProperties.length === 0;
 }
