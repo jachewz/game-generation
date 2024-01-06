@@ -1,46 +1,60 @@
+// actions.tsx
+
 'use server'
 
 import prisma from '@/lib/prisma'
 import { openai } from '@/lib/openai'
-import { type Pokemon } from '@prisma/client'
+import { type Game } from '@prisma/client'
 import { ratelimit } from '@/lib/utils'
 
-export async function searchPokedex(
-  query: string
-): Promise<Array<Pokemon & { similarity: number }>> {
+export async function getGames(
+  category?: string
+  ) : Promise<Array<Game>> {
   try {
-    if (query.trim().length === 0) return []
+    const { success } = await ratelimit.limit('generations');
+    if (!success) throw new Error('Rate limit exceeded');
 
-    const { success } = await ratelimit.limit('generations')
-    if (!success) throw new Error('Rate limit exceeded')
-
-    const embedding = await generateEmbedding(query)
-    const vectorQuery = `[${embedding.join(',')}]`
-    const pokemon = await prisma.$queryRaw`
-      SELECT
-        id,
-        "name",
-        1 - (embedding <=> ${vectorQuery}::vector) as similarity
-      FROM pokemon
-      where 1 - (embedding <=> ${vectorQuery}::vector) > .5
-      ORDER BY  similarity DESC
-      LIMIT 8;
-    `
-
-    return pokemon as Array<Pokemon & { similarity: number }>
+    const games = await prisma.game.findMany({
+    });
+    return games as Array<Game>;
   } catch (error) {
-    console.error(error)
-    throw error
+    console.error(error);
+    throw error;
   }
 }
 
-async function generateEmbedding(raw: string) {
-  // OpenAI recommends replacing newlines with spaces for best results
-  const input = raw.replace(/\n/g, ' ')
-  const embeddingData = await openai.embeddings.create({
-    model: 'text-embedding-ada-002',
-    input,
-  })
-  const [{ embedding }] = (embeddingData as any).data
-  return embedding
+export async function upvoteGame(gameId: number): Promise<Game> {
+  try {
+    const updatedGame = await prisma.game.update({
+      where: { id: gameId },
+      data: {
+        upvotes: {
+          increment: 1,
+        }
+      },
+    });
+
+    return updatedGame;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function downvoteGame(gameId: number): Promise<Game> {
+  try {
+    const updatedGame = await prisma.game.update({
+      where: { id: gameId },
+      data: {
+        downvotes: {
+          increment: 1,
+        }
+      },
+    });
+
+    return updatedGame;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
