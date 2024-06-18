@@ -7,6 +7,9 @@ export const metadata = {
   title: 'Game generation voting app',
   description:
     'Like or dislike game ideas. Top ideas will be regenerated and added to the carousel every week.',
+  icons: {
+      icon: '/logo.svg', // /public path
+    },
 }
 
 const inter = Inter({
