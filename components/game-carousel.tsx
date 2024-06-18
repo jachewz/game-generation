@@ -74,6 +74,7 @@ const GameCarousel: React.FC = () => {
     <Swiper
       grabCursor
       modules={[Navigation]}
+      navigation
       onSwiper={(s) => {
         console.log("initialize swiper", s);
         setSwiper(s);
@@ -83,12 +84,14 @@ const GameCarousel: React.FC = () => {
       {games.map((game) => (
         <SwiperSlide key={game.id}>
           <GameCard {...game} />
-          <div className="flex justify-center space-x-4 mt-4">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => handleDislike(game.id)}>
-              👎 {dislikes[game.id]}
+          <div className="flex justify-center space-x-8 my-8">
+            <button className="group rounded-full flex space-x-1 w-30 bg-white/30 shadow-sm ring-1 ring-gray-900/5 text-gray-600 text-sm font-medium px-10 py-3 hover:shadow-lg active:shadow-sm transition-all"
+              onClick={() => handleDislike(game.id)}>
+              💩 {dislikes[game.id]}
             </button>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => handleLike(game.id)}>
-              👍 {likes[game.id]}
+            <button className="group rounded-full flex space-x-1 w-30 bg-white/30 shadow-sm ring-1 ring-gray-900/5 text-gray-600 text-sm font-medium px-10 py-3 hover:shadow-lg active:shadow-sm transition-all"
+              onClick={() => handleLike(game.id)}>
+              💚 {likes[game.id]}
             </button>
           </div>
         </SwiperSlide>

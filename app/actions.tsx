@@ -3,7 +3,6 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { openai } from '@/lib/openai'
 import { type Game } from '@prisma/client'
 import { ratelimit } from '@/lib/utils'
 

@@ -6,15 +6,10 @@ export default function GameCard( game: Game ) {
     const [isCharactersOpen, setCharactersOpen] = useState(false);
     const [isFeaturesOpen, setFeaturesOpen] = useState(false);
     const [isMechanicsOpen, setMechanicsOpen] = useState(false);
-    const [likes, setLikes] = useState(0);
-    const [dislikes, setDislikes] = useState(0);
   
     const toggleCharacters = () => setCharactersOpen(!isCharactersOpen);
     const toggleFeatures = () => setFeaturesOpen(!isFeaturesOpen);
     const toggleMechanics = () => setMechanicsOpen(!isMechanicsOpen);
-  
-    const handleLike = () => setLikes(likes + 1);
-    const handleDislike = () => setDislikes(dislikes + 1);
 
     return (
         <div className="max-w-md mx-auto rounded overflow-hidden shadow-lg">

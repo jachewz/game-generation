@@ -1,11 +1,7 @@
-import { searchPokedex } from '@/app/actions'
 import ExpandingArrow from '@/components/expanding-arrow'
-import { Search } from '@/components/search'
 import GameCarousel from '@/components/game-carousel'
 import Image from 'next/image'
 import Link from 'next/link'
-
-export const dynamic = 'force-dynamic'
 
 export default function Home() {
   return (
@@ -14,33 +10,34 @@ export default function Home() {
         Game Idea Generator
       </h1>
 
-          <GameCarousel/>
+      <GameCarousel />
 
-
-      <p className="font-light text-gray-600 w-full max-w-lg text-center mt-6">
-        Generate games with{' '}
-        <Link
-          href="https://prisma.io"
-          className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-        >
-          Prisma
-        </Link>
-        , and{' '}
-        <Link
-          href="https://platform.openai.com/"
-          className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-        >
-          OpenAI
-        </Link>
-        . Built with{' '}
-        <Link
-          href="https://nextjs.org/docs"
-          className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-        >
-          Next.js App Router
-        </Link>
-        .
-      </p>
+      <div className="flex flex-col items-center justify-center mt-12">
+        <footer className="font-light text-gray-600 w-full max-w-lg text-center mt-6">
+          Built with{' '}
+          <Link
+            href="https://prisma.io"
+            className="font-medium underline underline-offset-4 hover:text-black transition-colors"
+          >
+            Prisma
+          </Link>
+          , {' '}
+          <Link
+            href="https://platform.openai.com/"
+            className="font-medium underline underline-offset-4 hover:text-black transition-colors"
+          >
+            OpenAI
+          </Link>
+          , and {' '}
+          <Link
+            href="https://nextjs.org/docs"
+            className="font-medium underline underline-offset-4 hover:text-black transition-colors"
+          >
+            Next.js App Router
+          </Link>
+          .
+        </footer>
+      </div>
       <div className="mt-12 w-full flex items-center justify-between px-6 ">
         <Link
           href="https://github.com/jachewz/game-generation"
@@ -55,7 +52,6 @@ export default function Home() {
           />
           <span className="font-light">Source</span>
         </Link>
-      </div>
-    </main>
+      </div></main>
   )
 }
